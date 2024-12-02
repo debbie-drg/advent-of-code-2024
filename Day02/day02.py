@@ -9,25 +9,27 @@ def parse_table(input_data: list[str]) -> tuple[list[int], list[int]]:
     return parsed_data
 
 
-def count_safe(parsed_data: list[list[int]]) -> int:
-    safe = 0
-    for line in parsed_data:
-        sorted_line = sorted(line)
-        reverse_sorted_line = sorted(line, reverse=True)
-        if (sorted_line != line) and (reverse_sorted_line != line):
-            continue
-        count = True
-        for index in range(len(line) - 1):
-            if abs(line[index] - line[index + 1]) > 3:
-                count = False
-                break
-            if line[index] == line[index + 1]:
-                count = False
-                break
-        if not count:
-            continue
-        safe += 1
-    return safe
+def is_safe(data: list[int], can_remove_one: bool) -> bool:
+    if can_remove_one:
+        if is_safe(data, False):
+            return True
+        for index in range(len(data)):
+            if is_safe(data[:index] + data[index + 1 :], False):
+                return True
+        return False
+    if len(data) > len(set(data)):
+        return False
+    ascending = sorted(data)
+    descending = sorted(data, reverse=True)
+    if data != ascending and data != descending:
+        return False
+    return (
+        max([abs(data[index] - data[index + 1]) for index in range(len(data) - 1)]) < 4
+    )
+
+
+def count_safe(parsed_data: list[list[int]], can_remove_one: bool = False) -> int:
+    return sum(map(lambda data: is_safe(data, can_remove_one), parsed_data))
 
 
 if __name__ == "__main__":
@@ -38,3 +40,4 @@ if __name__ == "__main__":
     input_data = open(file_name).read().strip().split("\n")
     parsed_data = parse_table(input_data)
     print(f"There are {count_safe(parsed_data)} safe reports.")
+    print(f"Allowing to remove one, there are {count_safe(parsed_data, True)}.")
