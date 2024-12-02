@@ -20,8 +20,7 @@ def is_safe(data: list[int], can_remove_one: bool) -> bool:
     if len(data) > len(set(data)):
         return False
     ascending = sorted(data)
-    descending = sorted(data, reverse=True)
-    if data != ascending and data != descending:
+    if data != ascending and data != ascending[::-1]:
         return False
     return (
         max([abs(data[index] - data[index + 1]) for index in range(len(data) - 1)]) < 4
