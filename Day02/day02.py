@@ -11,8 +11,6 @@ def parse_table(input_data: list[str]) -> tuple[list[int], list[int]]:
 
 def is_safe(data: list[int], can_remove_one: bool) -> bool:
     if can_remove_one:
-        if is_safe(data, False):
-            return True
         for index in range(len(data)):
             if is_safe(data[:index] + data[index + 1 :], False):
                 return True
