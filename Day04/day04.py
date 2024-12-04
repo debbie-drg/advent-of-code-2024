@@ -42,17 +42,19 @@ def count_x_mas(input_data: list[str]) -> int:
         for col in range(1, len(input_data) - 1):
             if input_data[row][col] != "A":
                 continue
-            down_left = input_data[row + 1][col - 1]
-            down_right = input_data[row + 1][col + 1]
-            up_left = input_data[row - 1][col - 1]
-            up_right = input_data[row - 1][col + 1]
-            if not set([down_left, down_right, up_left, up_right]) == set(["S", "M"]):
-                continue
-            if (down_left == up_right) or (down_right == up_left):
-                continue
-            if not [down_left, down_right, up_left, up_right].count("S") == 2:
-                continue
-            count += 1
+            check_str = "".join(
+                [
+                    input_data[i][j]
+                    for (i, j) in [
+                        (row + 1, col - 1),
+                        (row + 1, col + 1),
+                        (row - 1, col - 1),
+                        (row - 1, col + 1),
+                    ]
+                ]
+            )
+            if check_str in ["MMSS", "MSMS", "SMSM", "SSMM"]:
+                count += 1
     return count
 
 
