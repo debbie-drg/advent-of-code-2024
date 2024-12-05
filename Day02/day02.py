@@ -1,8 +1,7 @@
 import sys
-from collections import defaultdict
 
 
-def parse_table(input_data: list[str]) -> tuple[list[int], list[int]]:
+def parse_table(input_data: list[str]) -> list[list[int]]:
     parsed_data = []
     for line in input_data:
         parsed_data.append([int(number) for number in line.split()])
