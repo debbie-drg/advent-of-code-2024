@@ -1,4 +1,5 @@
 import sys
+from copy import deepcopy
 
 DIRECTIONS = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
@@ -12,10 +13,14 @@ class GuardMap:
         self.obstacles = set()
         world_map_lines = world_map.split("\n")
         self.world_map_lines = world_map_lines
+        self.per_row_obstacles = [[] for _ in range(len(self.world_map_lines))]
+        self.per_col_obstacles = [[] for _ in range(len(self.world_map_lines[0]))]
         for row_index, row in enumerate(world_map_lines):
             for col_index, char in enumerate(row):
                 if char == "#":
                     self.obstacles.add((row_index, col_index))
+                    self.per_row_obstacles[row_index].append(col_index)
+                    self.per_col_obstacles[col_index].append(row_index)
                 if char == "^":
                     self.guard_position = (row_index, col_index)
         self.guard_direction = 0
@@ -50,27 +55,72 @@ class GuardMap:
         self.guard_position = next_position
         return True
 
-    def creates_loop(self, added_obstacle) -> bool:
+    @staticmethod
+    def position_before_next_obstacle(
+        position: tuple[int, int],
+        direction: int,
+        per_row_obstacles: list[list[int]],
+        per_col_obstacles: list[list[int]],
+    ) -> tuple[int, int] | None:
+        if direction in [0, 2]:
+            col = position[1]
+            if direction == 0:
+                values = [
+                    value for value in per_col_obstacles[col] if value < position[0]
+                ]
+                if not values:
+                    return None
+                return (max(values) + 1, col)
+            else:
+                values = [
+                    value for value in per_col_obstacles[col] if value > position[0]
+                ]
+                if not values:
+                    return None
+                return (min(values) - 1, col)
+        else:
+            row = position[0]
+            if direction == 1:
+                values = [
+                    value for value in per_row_obstacles[row] if value > position[1]
+                ]
+                if not values:
+                    return None
+                return (row, min(values) - 1)
+            else:
+                values = [
+                    value for value in per_row_obstacles[row] if value < position[1]
+                ]
+                if not values:
+                    return None
+                return (row, max(values) + 1)
+
+    def creates_loop(self, added_obstacle: tuple[int, int]) -> bool:
         if added_obstacle in self.create_loops:
             return True
+        per_row_obstacles = deepcopy(self.per_row_obstacles)
+        per_col_obstacles = deepcopy(self.per_col_obstacles)
+        per_row_obstacles[added_obstacle[0]].append(added_obstacle[1])
+        per_col_obstacles[added_obstacle[1]].append(added_obstacle[0])
         position = self.guard_start
-        obstacles = self.obstacles | set([added_obstacle])
         direction = 0
         history = set([(0, position)])
-        while not self.out_of_bounds(position):
-            next_position = sum_duples(position, DIRECTIONS[direction])
-            if next_position in obstacles:
-                direction = (direction + 1) % 4
-                continue
+        while True:
+            next_position = self.position_before_next_obstacle(
+                position, direction, per_row_obstacles, per_col_obstacles
+            )
+            if next_position is None:
+                return False
             if ((direction, next_position)) in history:
                 return True
             position = next_position
             history.add((direction, position))
-        return False
+            direction = (direction + 1) % 4
 
     def guard_run(self) -> int:
         while self.move_guard():
             pass
+        self.create_loops.remove((sum_duples(self.guard_start, DIRECTIONS[0])))
         return len(self.visited)
 
 
