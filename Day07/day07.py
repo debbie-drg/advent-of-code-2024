@@ -19,7 +19,7 @@ def concatenate(left_side: int, right_side: int) -> int:
     return 0
 
 
-def is_valid(goal, result, remaining, concatenation):
+def is_valid(goal: int, result: int, remaining: list[int], concatenation: bool):
     if not remaining:
         return goal == result
     current = remaining[0]
