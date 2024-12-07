@@ -1,6 +1,6 @@
 import sys
 
-DECIMAL_REP = [int(float(f"1e{i}")) for i in range(16)]
+DECIMAL_REP = [int("1" + "0" * i) for i in range(16)]
 
 
 def parse_data(input_data: str) -> list[tuple[int, list[int]]]:
