@@ -1,5 +1,6 @@
 import sys
-from itertools import product
+
+DECIMAL_REP = [int(float(f"1e{i}")) for i in range(16)]
 
 
 def parse_data(input_data: str) -> list[tuple[int, list[int]]]:
@@ -11,27 +12,33 @@ def parse_data(input_data: str) -> list[tuple[int, list[int]]]:
     return parsed_data
 
 
+def concatenate(left_side: int, right_side: int) -> int:
+    for element in DECIMAL_REP:
+        if element > right_side:
+            return left_side * element + right_side
+    return 0
+
+
+def is_valid(goal, result, remaining, concatenation):
+    if not remaining:
+        return goal == result
+    current = remaining[0]
+    if is_valid(goal, result + current, remaining[1:], concatenation):
+        return True
+    if is_valid(goal, result * current, remaining[1:], concatenation):
+        return True
+    if concatenation and is_valid(
+        goal, concatenate(result, current), remaining[1:], concatenation
+    ):
+        return True
+    return False
+
+
 def is_valid_equation(
     equation: tuple[int, list[int]], concatenation: bool = False
 ) -> bool:
     goal, numbers = equation
-    number_operations = 3 if concatenation else 2
-    for operation_list in product(
-        *[range(number_operations) for _ in range(len(numbers) - 1)]
-    ):
-        result = numbers[0]
-        for index, operation in enumerate(operation_list):
-            if operation == 0:
-                result += numbers[index + 1]
-            elif operation == 1:
-                result *= numbers[index + 1]
-            else:
-                result = int(str(result) + str(numbers[index + 1]))
-            if result > goal:
-                break
-        if result == goal:
-            return True
-    return False
+    return is_valid(goal, 0, numbers, concatenation)
 
 
 def sum_valid(equations: list[tuple[int, list[int]]]) -> tuple[int, int]:
