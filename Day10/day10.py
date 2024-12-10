@@ -17,21 +17,19 @@ def score_per_trailhead(
     topo_map: list[str], position: tuple[int, int]
 ) -> tuple[int, int]:
     current_value = 0
-    paths = [[position]]
+    queue = [position]
     while current_value < 9:
-        next_paths = []
-        while paths:
-            path = paths.pop()
-            last_position = path[-1]
+        next_queue = []
+        while queue:
+            position = queue.pop()
             for direction in DIRECTIONS:
-                next_position = sum_duples(direction, last_position)
+                next_position = sum_duples(direction, position)
                 next_value = map_position(topo_map, next_position)
                 if next_value == current_value + 1:
-                    next_paths.append(path + [next_position])
+                    next_queue.append(next_position)
         current_value += 1
-        paths = next_paths
-    tailheads = set([path[-1] for path in paths])
-    return len(tailheads), len(paths)
+        queue = next_queue
+    return len(set(queue)), len(queue)
 
 
 def map_score(topo_map: list[str]) -> tuple[int, int]:
