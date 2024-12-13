@@ -18,16 +18,16 @@ def cramer_solve(matrix: list[list[int]], values: list[int]) -> list[int] | None
 
 
 def parse_and_solve(
-    equation: list[str], corrected_coordinates: bool = False
+    equation: str, corrected_coordinates: bool = False
 ) -> list[int]:
-    equation = equation.split("\n")
-    matrix_1 = re.findall("[0-9]+", equation[0])
-    matrix_2 = re.findall("[0-9]+", equation[1])
+    split_equation = equation.split("\n")
+    matrix_1 = re.findall("[0-9]+", split_equation[0])
+    matrix_2 = re.findall("[0-9]+", split_equation[1])
     matrix = [
         [int(matrix_1[0]), int(matrix_2[0])],
         [int(matrix_1[1]), int(matrix_2[1])],
     ]
-    values = [int(element) for element in re.findall("[0-9]+", equation[2])]
+    values = [int(element) for element in re.findall("[0-9]+", split_equation[2])]
     if corrected_coordinates:
         values[0] += 10000000000000
         values[1] += 10000000000000
@@ -37,7 +37,7 @@ def parse_and_solve(
     return [solution[0] * 3, solution[1]]
 
 
-def minimum_tokens(input: list[str], corrected_coordinates: bool = False):
+def minimum_tokens(input: str, corrected_coordinates: bool = False):
     return sum(
         [
             sum(parse_and_solve(equation, corrected_coordinates))
