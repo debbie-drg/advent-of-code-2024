@@ -100,7 +100,8 @@ if __name__ == "__main__":
     robot_field = RobotField(input_data, height, width)
     safety_factor = robot_field.safety_factor(100)
     print(f"After 100 seconds, the safety factor is {safety_factor}")
-    tree_index = robot_field.find_tree()
-    print(robot_field.print_turn(tree_index))
-    print(f"Tree showed up at turn {tree_index}")
-    print("Ho ho ho! Merry Christmas!")
+    if not "example" in file_name:
+        tree_index = robot_field.find_tree()
+        print(robot_field.print_turn(tree_index))
+        print(f"Tree showed up at turn {tree_index}")
+        print("Ho ho ho! Merry Christmas!")
