@@ -79,13 +79,33 @@ class RobotField:
                 continue
         return per_quadrant[0] * per_quadrant[1] * per_quadrant[2] * per_quadrant[3]
 
+    def biggest_connected_component(self, turn: int):
+        positions = set(
+            robot.position(turn, self.height, self.width) for robot in self.robots
+        )
+        max_component = 0
+        while positions:
+            current_position = positions.pop()
+            current_component = 0
+            queue = [current_position]
+            while queue:
+                next_position = queue.pop()
+                possible_neighbours = neighbours(next_position)
+                for position in possible_neighbours:
+                    if position in positions:
+                        current_component += 1
+                        positions.remove(position)
+                        queue.append(position)
+            max_component = max(max_component, current_component)
+        return max_component
+
     def find_tree(self):
         index = 0
         while True:
-            positions = [robot.position(index, self.height, self.width) for robot in self.robots]
-            if len(positions) == len(set(positions)):
+            if self.biggest_connected_component(index) > 100:
                 return index
             index += 1
+
 
 if __name__ == "__main__":
     try:
