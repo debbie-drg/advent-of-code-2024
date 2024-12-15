@@ -73,10 +73,9 @@ class RobotField:
         ]
         per_quadrant = [0, 0, 0, 0]
         for position in positions:
-            try:
-                per_quadrant[self.quadrant(position)] += 1
-            except TypeError:
-                continue
+            quadrant = self.quadrant(position)
+            if quadrant is not None:
+                per_quadrant[quadrant] += 1
         return per_quadrant[0] * per_quadrant[1] * per_quadrant[2] * per_quadrant[3]
 
     def biggest_connected_component(self, turn: int):
