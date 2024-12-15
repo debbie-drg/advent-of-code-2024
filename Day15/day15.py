@@ -49,6 +49,7 @@ class Warehouse:
     def __init__(self, warehouse_map: str, wide: bool = False) -> None:
         split_map = warehouse_map.strip().split("\n")
         self.boxes = set()
+        self.positions_to_boxes = {}
         self.height = len(split_map)
         self.width = len(split_map[0])
         self.wide = wide
@@ -58,7 +59,10 @@ class Warehouse:
         for row_index, row in enumerate(split_map):
             for col_index, symbol in enumerate(row):
                 if symbol == "O":
-                    self.boxes.add(Box((row_index, (wide + 1) * col_index), wide))
+                    box = Box((row_index, (wide + 1) * col_index), wide)
+                    for position in box.get_positions():
+                        self.positions_to_boxes[position] = box
+                    self.boxes.add(box)
                 elif symbol == "@":
                     self.robot_position = (row_index, (wide + 1) * col_index)
                 elif symbol == "#":
@@ -91,12 +95,6 @@ class Warehouse:
             repr_out += current_line + "\n"
         return repr_out.strip()
 
-    def in_box(self, position: tuple[int, int]) -> bool:
-        for box in self.boxes:
-            if box.in_box(position):
-                return True
-        return False
-
     def move_robot(self, command: str):
         direction = DIRECTIONS[command]
         next_position = sum_duples(self.robot_position, direction)
@@ -109,19 +107,26 @@ class Warehouse:
             current_position = positions_to_check.pop()
             if current_position in self.walls:
                 return
-            for box in self.boxes:
-                if box.in_box(current_position):
-                    boxes_to_move.add(box)
-                    box_next_positions = box.get_moved_positions(direction)
-                    positions_to_check |= box_next_positions.difference(
-                        positions_checked
-                    )
-                    positions_checked.add(current_position)
+            if current_position in self.positions_to_boxes:
+                box = self.positions_to_boxes[current_position]
+                boxes_to_move.add(box)
+                box_next_positions = box.get_moved_positions(direction)
+                positions_to_check |= box_next_positions.difference(
+                    positions_checked
+                )
+                positions_checked.add(current_position)
         if not boxes_to_move:
             self.robot_position = next_position
             return
         for box in boxes_to_move:
+            box_positions = box.get_positions()
+            for position in box_positions:
+                self.positions_to_boxes.pop(position)
+        for box in boxes_to_move:
             box.update_position(direction)
+            box_positions = box.get_positions()
+            for position in box_positions:
+                self.positions_to_boxes[position] = box            
         self.robot_position = sum_duples(self.robot_position, direction)
 
     def sum_of_coordinates(self) -> int:
