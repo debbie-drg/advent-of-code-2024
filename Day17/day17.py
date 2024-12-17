@@ -64,13 +64,16 @@ class TernaryMachine:
     def find_self_output(
         self, instructions, A_value=0, current_length: int = 1
     ) -> int | None:
+        # The key realisation is that in each loop through the instructions, the contents of register
+        # A are divided by 8. Therefore we can try to go right to left, finding the correct end and 
+        # multiplying by 8 going one level up to the next digit.
         to_compare = [int(element) for element in instructions.split(" ")[1].split(",")]
         if current_length == len(to_compare) + 1:
             return A_value
         for index in range(8):
             self.register_A = A_value * 8 + index
             output = self.perform_instructions(instructions, False)
-            if output[0] == to_compare[-current_length]:
+            if output == to_compare[-current_length:]:
                 next_value = self.find_self_output(
                     instructions, A_value * 8 + index, current_length + 1
                 )
