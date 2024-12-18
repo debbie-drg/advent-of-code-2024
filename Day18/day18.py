@@ -48,7 +48,7 @@ class MemoryArray:
                 heapq.heappush(queue, (steps + 1, neighbour, path | set([neighbour])))
         return None, None
 
-    def first_byte_blocking(self, corrupted: list[str]) -> tuple[int, int] | None:
+    def first_byte_blocking(self, corrupted: list[str]) -> tuple[int, int]:
         while len(corrupted) > 1:
             mid_point = len(corrupted) // 2
             self.corrupted = self.original_corrupted.union(
