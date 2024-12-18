@@ -29,11 +29,11 @@ class MemoryArray:
     def in_bounds(self, position: tuple[int, int]) -> bool:
         return 0 <= position[0] <= self.size and 0 <= position[1] <= self.size
 
-    def shortest_path(self) -> tuple[int, set[tuple[int, int]]] | tuple[None, None]:
-        queue = [(0, (0, 0), set([(0, 0)]))]
+    def shortest_path(self) -> int | None:
+        queue = [(0, (0, 0))]
         visited = set([(0, 0)])
         while queue:
-            steps, position, path = heapq.heappop(queue)
+            steps, position = heapq.heappop(queue)
             neighbours_to_check = neighbours(position)
             for neighbour in neighbours_to_check:
                 if not self.in_bounds(neighbour):
@@ -43,10 +43,9 @@ class MemoryArray:
                 if neighbour in visited:
                     continue
                 if neighbour == (self.size, self.size):
-                    return steps + 1, path | set([neighbour])
+                    return steps + 1
                 visited.add(neighbour)
-                heapq.heappush(queue, (steps + 1, neighbour, path | set([neighbour])))
-        return None, None
+                heapq.heappush(queue, (steps + 1, neighbour))
 
     def first_byte_blocking(self, corrupted: list[str]) -> tuple[int, int]:
         while len(corrupted) > 1:
@@ -54,7 +53,7 @@ class MemoryArray:
             self.corrupted = self.original_corrupted.union(
                 set([parse_corrupted(corrupt) for corrupt in corrupted[:mid_point]])
             )
-            _, shortest_path = self.shortest_path()
+            shortest_path = self.shortest_path()
             if shortest_path is None:
                 corrupted = corrupted[:mid_point]
             else:
@@ -72,7 +71,7 @@ if __name__ == "__main__":
     size = 6 if "example" in file_name else 70
     fallen = 12 if "example" in file_name else 1024
     memory_array = MemoryArray(corrupted_blocks[:fallen], size)
-    shortest_path_length, _ = memory_array.shortest_path()
+    shortest_path_length = memory_array.shortest_path()
     print(f"The length of the shortest path is {shortest_path_length}")
     first_byte = memory_array.first_byte_blocking(corrupted_blocks[fallen:])
     print(f"The first byte blocking the exit is {first_byte}")
