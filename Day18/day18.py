@@ -24,6 +24,7 @@ class MemoryArray:
         self.size = size
         for line in corrupted:
             self.corrupted.add(parse_corrupted(line))
+        self.original_corrupted = self.corrupted
 
     def in_bounds(self, position: tuple[int, int]) -> bool:
         return 0 <= position[0] <= self.size and 0 <= position[1] <= self.size
@@ -48,17 +49,18 @@ class MemoryArray:
         return None, None
 
     def first_byte_blocking(self, corrupted: list[str]) -> tuple[int, int] | None:
-        _, shortest_path = self.shortest_path()
-        if shortest_path is None:
-            return None
-        for element in corrupted:
-            parsed_element = parse_corrupted(element)
-            self.corrupted.add(parsed_element)
-            if parsed_element not in shortest_path:
-                continue
+        while len(corrupted) > 1:
+            mid_point = len(corrupted) // 2
+            self.corrupted = self.original_corrupted.union(
+                set([parse_corrupted(corrupt) for corrupt in corrupted[:mid_point]])
+            )
             _, shortest_path = self.shortest_path()
             if shortest_path is None:
-                return parsed_element
+                corrupted = corrupted[:mid_point]
+            else:
+                corrupted = corrupted[mid_point:]
+                self.original_corrupted = self.corrupted
+        return parse_corrupted(corrupted[0])
 
 
 if __name__ == "__main__":
