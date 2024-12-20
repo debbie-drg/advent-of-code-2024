@@ -1,7 +1,5 @@
 import sys
 import heapq
-from collections import defaultdict
-from functools import cache
 
 DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
