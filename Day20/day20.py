@@ -57,8 +57,8 @@ class RaceTrack:
             self.path = self.shortest_path()
         cheats_count, cheats_count_20 = 0, 0
         for index, position in enumerate(self.path):
-            difference = -1
-            for other_position in self.path[index:]:
+            difference = 99
+            for other_position in self.path[index + 100:]:
                 difference += 1
                 distance = manhattan_distance(position, other_position)
                 if distance > 20:
