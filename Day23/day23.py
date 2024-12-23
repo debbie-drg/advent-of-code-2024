@@ -57,7 +57,7 @@ class NetworkGraph:
             ]
         )
 
-    def find_superclique(self) -> set[str]:
+    def get_password(self) -> str:
         neighbour_lists = [
             self.nodes[node].neighbours.union({node}) for node in self.nodes
         ]
@@ -65,14 +65,10 @@ class NetworkGraph:
         while queue:
             priority, nodes = heapq.heappop(queue)
             if self.all_connected(nodes):
-                return nodes
+                return ",".join(sorted(nodes))
             for node in nodes:
                 heapq.heappush(queue, (priority + 1, nodes - {node}))
-        return set()
-
-    def get_password(self) -> str:
-        biggest_clique = self.find_superclique()
-        return ",".join(sorted(biggest_clique))
+        return ""
 
 
 if __name__ == "__main__":
