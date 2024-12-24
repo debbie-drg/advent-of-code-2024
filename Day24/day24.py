@@ -103,6 +103,9 @@ class MonitoringDevice:
                 inter_sum_carry, output = output, inter_sum_carry
                 to_swap.extend([inter_sum_carry, output])
 
+            if not inter_sum_carry or not inter_carry:
+                raise ValueError
+            
             next_carry = self.find_output(inter_sum_carry, inter_carry, "OR")
         else:
             output = inter_sum
