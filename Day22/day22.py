@@ -1,33 +1,20 @@
 import sys
 from collections import defaultdict
+from multiprocessing import Pool
 
-
-def mix(number: int, secret_number: int) -> int:
-    return number ^ secret_number
-
-
-def prune(number: int) -> int:
-    return number % 16777216
+PRUNE = 0xFFFFFF
 
 
 def secret_number(number: int) -> int:
-    mult = number << 6
-    number = mix(mult, number)
-    number = prune(number)
-    div = number >> 5
-    number = mix(div, number)
-    number = prune(number)
-    mult = number << 11
-    number = mix(mult, number)
-    return prune(number)
+    number = ((number << 6) ^ number) & PRUNE
+    number = ((number >> 5) ^ number) & PRUNE
+    return ((number << 11) ^ number) & PRUNE
 
 
-def iterate_secret_number(
-    number: int, times: int
-) -> tuple[int, defaultdict[tuple[int], int]]:
+def iterate_secret_number(number: int) -> tuple[int, defaultdict[tuple[int], int]]:
     banana_counts = defaultdict(int)
     sequence = (None, None, None, None)
-    for index in range(times):
+    for index in range(2000):
         last_price = number % 10
         number = secret_number(number)
         new_price = number % 10
@@ -49,10 +36,12 @@ def mix_dicts(
 def sum_and_best_price(buyer_numbers: list[int]) -> tuple[int, int]:
     banana_counts = defaultdict(int)
     secret_sum = 0
-    for number in buyer_numbers:
-        secret, banana_count = iterate_secret_number(number, 2000)
+    pool = Pool()
+    results = list(pool.imap_unordered(iterate_secret_number, buyer_numbers))
+    for secret, banana_count in results:
         secret_sum += secret
         banana_counts = mix_dicts(banana_counts, banana_count)
+    pool.close()
     return secret_sum, max(banana_counts.values())
 
 
